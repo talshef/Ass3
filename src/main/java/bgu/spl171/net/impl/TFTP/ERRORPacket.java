@@ -17,4 +17,9 @@ public class ERRORPacket extends Packet {
 	}
 	
 
+	
+	public byte[] toBytes(){
+		byte[] temp=mergeBytes(super.toBytes(), TFTPEncoderDecoder.shortToBytes(errorCode));
+		return mergeBytes(temp, msg.getBytes());
+	}
 }
