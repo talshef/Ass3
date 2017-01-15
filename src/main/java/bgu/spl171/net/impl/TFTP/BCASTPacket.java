@@ -17,4 +17,12 @@ public class BCASTPacket extends Packet {
 	public String GetFileName(){
 		return this.fileName;
 	}
+	
+	public byte[] toByte(){
+		byte[] stateByte=new byte[1];
+		stateByte[0]=state;
+		byte[] temp=mergeBytes(super.toBytes(), stateByte);
+		return mergeBytes(temp, (fileName+'\0').getBytes());
+		
+	}
 }

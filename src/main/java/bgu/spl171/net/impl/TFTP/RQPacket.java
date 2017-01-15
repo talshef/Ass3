@@ -12,4 +12,8 @@ public class RQPacket extends Packet {
 	public String GetString(){
 		return this.s;
 	}
+	
+	public byte[] toBytes(){
+		return mergeBytes(super.toBytes(),(s+'\0').getBytes());
+	}
 }
