@@ -80,7 +80,6 @@ public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 
 	@Override
 	public byte[] encode(Packet message) {
-		// TODO Auto-generated method stub
 		return message.toBytes();
 	}
    
