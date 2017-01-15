@@ -23,4 +23,5 @@ public class DATAPacket extends Packet {
 	public byte[] GetData(){
 		return this.data;
 	}
+
 }

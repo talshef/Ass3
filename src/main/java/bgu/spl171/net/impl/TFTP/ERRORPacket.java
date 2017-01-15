@@ -15,4 +15,6 @@ public class ERRORPacket extends Packet {
 	public String GetMsg(){
 		return this.msg;
 	}
+	
+
 }
