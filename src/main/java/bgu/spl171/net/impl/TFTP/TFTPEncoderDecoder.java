@@ -10,7 +10,8 @@ public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 		return null;
 	}
 
-	@Override hk
+	@Override
+	//jl
 	public byte[] encode(Packet message) {
 		// TODO Auto-generated method stub
 		return null;
