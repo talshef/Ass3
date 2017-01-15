@@ -11,5 +11,9 @@ public class Packet {
 		return this.oppcode;
 	}
 	
+	public byte[] toBytes(){
+		shooppcode
+	}
+	
 }
 
