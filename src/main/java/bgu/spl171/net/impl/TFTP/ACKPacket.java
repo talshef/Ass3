@@ -15,4 +15,8 @@ public class ACKPacket extends Packet {
 		return this.blockNum;
 	}
 	
+	public byte[] toBytes(){
+		return mergeBytes(super.toBytes(), TFTPEncoderDecoder.shortToBytes(blockNum));
+	}
+	
 }
