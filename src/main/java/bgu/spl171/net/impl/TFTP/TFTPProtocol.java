@@ -17,7 +17,7 @@ import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl171.net.api.bidi.Connections;
 import bgu.spl171.net.impl.TFTP.Packet;
 
-public class TFTPProtocol implements BidiMessagingProtocol<Packet> {
+public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private static Map<Integer,String> users=new HashMap<Integer, String>();
 	private static ConcurrentLinkedDeque<String> files=new ConcurrentLinkedDeque<String>();

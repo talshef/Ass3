@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import bgu.spl171.net.api.MessageEncoderDecoder;
 
-public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
+public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 	
 	private int state=0;
 
