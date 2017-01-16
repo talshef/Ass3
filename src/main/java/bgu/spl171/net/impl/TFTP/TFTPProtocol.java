@@ -16,6 +16,7 @@ import bgu.spl171.net.api.bidi.Connections;
 import bgu.spl171.net.impl.TFTP.Packet;
 
 public class TFTPProtocol implements BidiMessagingProtocol<Packet> {
+	
 	private static Map<Integer,String> users=new HashMap<Integer, String>();
 	private static ConcurrentLinkedDeque<String> files=new ConcurrentLinkedDeque<String>();
 	
@@ -31,7 +32,7 @@ public class TFTPProtocol implements BidiMessagingProtocol<Packet> {
 	
 	@Override
 	public void start(int connectionId, Connections<Packet> connections) {
-		this.id=id;
+		this.id=connectionId;
 		this.connections=connections;
 		
 	}

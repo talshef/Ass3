@@ -67,6 +67,7 @@ public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 			shortIndex=0;
 			return bytesToShort(shortBytes);
 		}
+		shortIndex++;
 		return -1;
 		
 	}
