@@ -1,8 +1,9 @@
 package bgu.spl171.net.srv;
 
 import bgu.spl171.net.api.MessageEncoderDecoder;
-import bgu.spl171.net.api.MessagingProtocol;
 import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
+
+
 import bgu.spl171.net.api.bidi.Connections;
 
 import java.io.BufferedInputStream;
@@ -18,13 +19,17 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
+    private Connections<T> connections;
+    private int id;
    
     
     
-    public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol) {
+    public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol,Connections<T> connections, int id) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
+        this.connections=connections;
+        this.id=id;
     }
     
 
@@ -48,7 +53,8 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 //                    }
                 }
             }
-
+            close();
+            
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -58,6 +64,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     @Override
     public void close() throws IOException {
         connected = false;
+        this.connections.disconnect(this.id);
         sock.close();
     }
 

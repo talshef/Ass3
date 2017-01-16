@@ -42,13 +42,14 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 Socket clientSock = serverSock.accept();
                 BidiMessagingProtocol<T> protocol=protocolFactory.get();
+                int id=Idcounter.getAndIncrement();
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
-                        protocol);
-                int id=Idcounter.getAndIncrement();
+                        protocol,
+                        this.connections,
+                        id);
                 this.connections.AddConnection(id, handler);
-               
                
                 execute(()-> {
                 	protocol.start(id, connections);
