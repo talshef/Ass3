@@ -18,7 +18,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
 
     private final MessagingProtocol<T> protocol;
     private final MessageEncoderDecoder<T> encdec;
-    private final Queue<ByteBuffer> writeQueue = new LinkedList<>();
+    private final Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<>();
     private final SocketChannel chan;
     private final Reactor reactor;
 
@@ -39,8 +39,6 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         boolean success = false;
         try {
             success = chan.read(buf) != -1;
-        } catch (ClosedByInterruptException ex) {
-            Thread.currentThread().interrupt();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -100,7 +98,8 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         }
 
         if (writeQueue.isEmpty()) {
-            reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
+            if (protocol.shouldTerminate()) close();
+            else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
         }
     }
 
