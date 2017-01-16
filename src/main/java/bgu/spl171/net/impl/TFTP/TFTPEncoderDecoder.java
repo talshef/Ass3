@@ -9,71 +9,47 @@ import bgu.spl171.net.api.MessageEncoderDecoder;
 public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 	
 	private int state=0;
-	private byte[] oppcodebyte = new byte[2];
+
 	private byte[] bytes = new byte[1 << 10]; //start with 1k
+	private byte[] shortBytes=new byte[2];
 	private int len = 0;
-	private short tempShort1=0;
-	private short tempShort2=0;
-	private String tempString;
-	private short oppcode;
+	private short blockNum=-1;
+	private short packetSize=-1;
+	private short oppcode=-1;
+	private int shortIndex=0;
+	private short byteLeft=-1;
 	
 	@Override
 	public Packet decodeNextByte(byte nextByte) {
-		if(state<2){
-			this.oppcodebyte[state]=nextByte;
-			if(state==1) this.oppcode=bytesToShort(this.oppcodebyte);
-			state++;
+		if(oppcode==-1){
+			oppcode=getShort(nextByte);
+			if(this.oppcode==6||this.oppcode==10){
+				Packet temp=new Packet(oppcode);
+				this.oppcode=-1;
+				return temp;
+			}
 		}
 		else{
 			switch(this.oppcode){
 			case 1:
+					return stringPakect(nextByte);
 			case 2:
-					if(nextByte=='\0'){
-						Packet result=new RQPacket(this.oppcode, new String(this.bytes, 0, this.len, StandardCharsets.UTF_8));
-						this.len=0;
-						this.oppcode=0;
-						return result;
-					}
-					else{
-						pushByte(nextByte);
-						return null;
-					}
+					return stringPakect(nextByte);
 			case 3:
-					
+					return dataPakect(nextByte);
 				
 			case 4:
-					if(this.len==1){
-						pushByte(nextByte);
-						Packet result=new ACKPacket(this.oppcode, bytesToShort(Arrays.copyOfRange(this.bytes, 0, this.len-1)));
-						this.len=0;
-						this.oppcode=0;
-						return result;
-					}
-					else{
-						pushByte(nextByte);
-						return null;
-					}
-			
+					return ackPakect(nextByte);
 			case 5:
-					if(this.len==1){
-						pushByte(nextByte);
-						this.tempShort1=bytesToShort(Arrays.copyOfRange(this.bytes, 0, this.len-1));
-					}
-					else if(this.len==3){
-						pushByte(nextByte);
-						this.tempString= new String(this.bytes,2,this.len-1);
-					}
+					return errorPacket(nextByte);
+			case 7:
+					return stringPakect(nextByte);
+			case 8:
+					return stringPakect(nextByte);
 					
-			
-					
-			
-			
+			 default:
+				 throw new Exception("unknown opcode");
 			}
-			
-			
-			
-			
-			
 		}
 		return null;
 	}
@@ -82,16 +58,105 @@ public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 	public byte[] encode(Packet message) {
 		return message.toBytes();
 	}
+	
+	
+	private short getShort(byte nextByte){
+		shortBytes[shortIndex]=nextByte;
+		if (shortIndex==1) {
+			shortIndex=0;
+			return bytesToShort(shortBytes);
+		}
+		return -1;
+		
+	}
+	
+	
+	
+	private Packet dataPakect(byte nextByte){
+		Packet result=null;
+		if (byteLeft==-1) byteLeft=getShort(nextByte);
+		else{
+			if(blockNum==-1) blockNum=getShort(nextByte);
+			else{
+				if(byteLeft==0) {
+					result=new DATAPacket(oppcode, (short)(this.len-1), blockNum,getData() );
+					this.len=0;
+					this.oppcode=-1;
+					this.blockNum=-1;
+					this.byteLeft=-1;
+					
+				}
+				else{
+					pushByte(nextByte);
+					byteLeft--;
+				}
+			}
+		}
+		return result;
+			
+		
+	}
+	
+	private Packet errorPacket(byte nextByte){
+		Packet result=null;
+		if(blockNum==-1) blockNum=getShort(nextByte);
+		else{
+			if(nextByte=='\0'){
+				result= new ERRORPacket(oppcode, blockNum, new String(this.bytes, 0, this.len, StandardCharsets.UTF_8));
+				this.len=0;
+				this.oppcode=-1;
+				this.blockNum=-1;
+			}
+			else{
+				pushByte(nextByte);
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	
+	
+	private Packet stringPakect(byte nextByte){
+		if(nextByte=='\0'){
+			Packet result=new RQPacket(this.oppcode, new String(this.bytes, 0, this.len, StandardCharsets.UTF_8));
+			this.len=0;
+			this.oppcode=-1;
+			return result;
+		}
+		else{
+			pushByte(nextByte);
+			return null;
+		}
+	}
+	private Packet ackPakect(byte nextByte){
+		Packet result=null;
+		blockNum=getShort(nextByte);
+		if (blockNum!=-1) {
+			result=new ACKPacket(this.oppcode, blockNum);
+			this.blockNum=-1;
+			this.oppcode=-1;
+		}
+		return result;
+		
+	}
    
 	
-	   private void pushByte(byte nextByte) {
-	        if (this.len >= this.bytes.length) {
-	            this.bytes = Arrays.copyOf(this.bytes, this.len * 2);
-	        }
+	private void pushByte(byte nextByte) {
+		if (this.len >= this.bytes.length) {
+			this.bytes = Arrays.copyOf(this.bytes, this.len * 2);
+		}
+		
+		this.bytes[this.len++] = nextByte;
+	}
 
-	        this.bytes[this.len++] = nextByte;
-	    }
-
+	   
+	   
+	private byte[] getData(){
+		//TODO check index
+		return Arrays.copyOfRange(this.bytes, 0, len);
+	}
 	
 	public static short bytesToShort(byte[] byteArr)
     {
