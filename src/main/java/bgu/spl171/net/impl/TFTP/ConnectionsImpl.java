@@ -6,7 +6,7 @@ import java.util.WeakHashMap;
 import bgu.spl171.net.api.bidi.Connections;
 import bgu.spl171.net.srv.ConnectionHandler;
 
-public class ConectionsImpl<T> implements Connections<T> {
+public class ConnectionsImpl<T> implements Connections<T> {
 	
 	private Map<Integer,ConnectionHandler<T>> connections = new WeakHashMap<Integer, ConnectionHandler<T>>();
 	

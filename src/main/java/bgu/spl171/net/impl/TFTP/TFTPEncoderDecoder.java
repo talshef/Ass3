@@ -48,7 +48,8 @@ public class TFTPEncoderDecoder implements MessageEncoderDecoder<Packet> {
 					return stringPakect(nextByte);
 					
 			 default:
-				 throw new Exception("unknown opcode");
+				 //throw new Exception("unknown opcode");
+				//TODO unknown opcode
 			}
 		}
 		return null;
