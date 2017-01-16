@@ -43,10 +43,20 @@ public class TFTPProtocol implements BidiMessagingProtocol<Packet> {
 	@Override
 	public void process(Packet message) {
 		if(!loggedIn){
-			if(message.GetOppcode()==7) LogRequest((RQPacket)message);
-			else{
+			switch(message.GetOppcode()){
+			case 7: LogRequest((RQPacket)message);
+					break;
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 6:
+			case 8:
+			case 10:
 				this.connections.send(this.id, new ERRORPacket((short)5, (short)6, "User not logged in"));
-			}
+				break;
+			default: this.connections.send(this.id, new ERRORPacket((short)5, (short)4, "Illegal TFTP opp"));
+			}	
 		}
 		else{
 			switch(message.GetOppcode()){

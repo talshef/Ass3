@@ -1,9 +1,9 @@
 package bgu.spl171.net.impl.TFTP;
 
 public class DATAPacket extends Packet {
-	short packetSize;
-	short blockNum;
-	byte[] data;
+	private short packetSize;
+	private short blockNum;
+	private byte[] data;
 	
 	public DATAPacket(short oppcode,short packetSize,short blockNum,byte[] data) {
 		super(oppcode);

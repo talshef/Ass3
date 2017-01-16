@@ -1,7 +1,7 @@
 package bgu.spl171.net.impl.TFTP;
 
 public class Packet {
-	short oppcode;
+	private short oppcode;
 	
 	public Packet(short oppcode) {
 		this.oppcode=oppcode;

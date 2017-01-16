@@ -1,8 +1,9 @@
 package bgu.spl171.net.impl.TFTP;
 
 public class ERRORPacket extends Packet {
-	short errorCode;
-	String msg;
+	private short errorCode;
+	private String msg;
+	
 	public ERRORPacket(short oppcode,short errorCode,String msg) {
 		super(oppcode);
 		this.errorCode=errorCode;
