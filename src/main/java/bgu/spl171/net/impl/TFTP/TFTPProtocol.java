@@ -140,7 +140,7 @@ public class TFTPProtocol implements BidiMessagingProtocol<Packet> {
 	
 	private void ACKProcess(ACKPacket message){
 		switch(this.ackState){
-			case 1: if(this.blockCount!=message.blockNum) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "The ACK block not much to Data block"));
+			case 1: if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "The ACK block not much to Data block"));
 					else{
 						if(!this.sendQueue.isEmpty()){
 							this.connections.send(this.id, this.sendQueue.removeFirst());

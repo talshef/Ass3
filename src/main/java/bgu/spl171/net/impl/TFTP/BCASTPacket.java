@@ -1,8 +1,8 @@
 package bgu.spl171.net.impl.TFTP;
 
 public class BCASTPacket extends Packet {
-	byte state;
-	String fileName;
+	private byte state;
+	private String fileName;
 	
 	public BCASTPacket(short oppcode,byte state,String fileName) {
 		super(oppcode);

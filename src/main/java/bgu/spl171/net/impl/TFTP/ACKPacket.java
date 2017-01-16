@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class ACKPacket extends Packet {
-	short blockNum;
+	private short blockNum;
 	
 	public ACKPacket(short oppcode,short blockNum) {
 		super(oppcode);
