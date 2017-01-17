@@ -18,7 +18,7 @@ public class BCASTPacket extends Packet {
 		return this.fileName;
 	}
 	
-	public byte[] toByte(){
+	public byte[] toBytes(){
 		byte[] stateByte=new byte[1];
 		stateByte[0]=state;
 		byte[] temp=mergeBytes(super.toBytes(), stateByte);

@@ -5,6 +5,7 @@ import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
 
 
 import bgu.spl171.net.api.bidi.Connections;
+import bgu.spl171.net.impl.TFTP.Packet;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,12 +39,15 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
-
+          
 
             in = new BufferedInputStream(sock.getInputStream());
             out = new BufferedOutputStream(sock.getOutputStream());
 
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
+            	
+            	
+            	
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     protocol.process(nextMessage);
@@ -70,8 +74,10 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
 	@Override
 	public void send(T msg) {
+		
 		if(msg!=null){
 			try {
+				System.out.println("opp send : "+((Packet)msg).GetOppcode());
 				out.write(encdec.encode(msg));
 				out.flush();
 			} catch (IOException e) {
@@ -82,6 +88,9 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 		}
 		
 	}
+	
+	
+		
 
 
 }

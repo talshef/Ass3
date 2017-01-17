@@ -12,14 +12,14 @@ public class ConnectionsImpl<T> implements Connections<T> {
 	
 	
 	public boolean AddConnection(int id,ConnectionHandler<T> con){
-		if (connections.containsKey(id)) return false;
-		connections.put(id, con);
+		if (connections.containsKey(new Integer(id))) return false;
+		connections.put(new Integer(id), con);
 		return true;
 	}
 	@Override
 	public boolean send(int connectionId, T msg) {
-		if (connections.containsKey(connectionId)) return false;
-		connections.get(connectionId).send(msg);
+		if (!connections.containsKey(new Integer(connectionId))) return false;
+		connections.get(new Integer(connectionId)).send(msg);
 		return true;
 	}
 
@@ -33,7 +33,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
 	@Override
 	public void disconnect(int connectionId) {
-		connections.remove(connectionId);
+		connections.remove(new Integer(connectionId));
 		
 	}
 

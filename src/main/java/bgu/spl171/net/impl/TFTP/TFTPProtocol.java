@@ -5,6 +5,7 @@ package bgu.spl171.net.impl.TFTP;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -20,11 +21,11 @@ import bgu.spl171.net.impl.TFTP.Packet;
 public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private static Map<Integer,String> users=new HashMap<Integer, String>();
-	private static ConcurrentLinkedDeque<String> files=new ConcurrentLinkedDeque<String>();
+	private static ConcurrentLinkedDeque<String> files=FilesInit();
 	
 	private FileOutputStream file=null;
 	private String filename=null;
-	private String filesFolder="/Files/";
+	private String filesFolder=System.getProperty("user.dir")+"/Files/";
 	private Connections<Packet> connections;
 	private int id;
 	private LinkedList<Packet> sendQueue=new LinkedList<Packet>();
@@ -42,6 +43,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 
 	@Override
 	public void process(Packet message) {
+		
 		if(!loggedIn){
 			switch(message.GetOppcode()){
 			case 7: LogRequest((RQPacket)message);
@@ -96,8 +98,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 
 	private void ReadRequest(RQPacket message){
 		String s=this.filesFolder+message.GetString();
-		
-		
+		System.out.println("read");
 			 try {
 				File f=new File(s);
 				if(!files.contains(message.GetString())) this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
@@ -115,12 +116,14 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 		
 	private void WriteRequest(RQPacket message){
+		System.out.println("write");
 		String s=this.filesFolder+message.GetString();
 		this.filename=message.GetString();
 		try {
 			File f=new File(s);
 			if(f.exists()) this.connections.send(this.id, new ERRORPacket((short)5, (short)5, "File already exists"));
 			else{
+				System.out.println(f.getAbsolutePath());
 				f.createNewFile();
 				this.file=new FileOutputStream(f,true);
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
@@ -149,6 +152,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void ACKProcess(ACKPacket message){
+		System.out.println("ACK");
 		switch(this.ackState){
 			case 1: if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "The ACK block not much to Data block"));
 					else{
@@ -168,17 +172,32 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void DirRequest(Packet message){
+		System.out.println("dir");
 		String s="";
+		int counter=0;
 		for(String filename: this.files){
-			s=filename+"\0";
+			counter+=filename.length()+1;
+			
 		}
-		byte[] res=s.getBytes();
+		byte[] res=new byte[counter];
+		ByteBuffer buffer=ByteBuffer.wrap(res);
+		byte[] zeroArray={0x00};
+		for(String filename: this.files){
+			buffer.put(filename.getBytes());
+			buffer.put(zeroArray);
+
+		}
 		ByteToPacket(res);
 	}
 	
 	private void LogRequest(RQPacket message){
-		if(users.containsValue(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)7, "User already logged in"));
+		System.out.println("log " + message.GetString());
+		
+		if(users.containsValue(this.id) || users.containsValue(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)7, "User already logged in"));
+		
 		else{
+			
+
 			users.put(this.id, message.GetString());
 			this.loggedIn=true;
 			this.connections.send(this.id, new ACKPacket((short)4, (short)0));
@@ -186,6 +205,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void DelRequest(RQPacket message){
+		System.out.println("del");
 		if(!files.contains(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "File not found"));
 		else{
 			File f= new File(this.filesFolder+message.GetString());
@@ -204,11 +224,14 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 
 	
 	private void DisProcess(Packet message){
+		System.out.println("dis");
+		this.connections.send(this.id, new ACKPacket((short)4, (short)0));
 		users.remove(this.id);
 		this.shouldTerminate=true;
 	}
 	
 	private void ByteToPacket(byte[] array){
+		System.out.println(array.length);
 		int numOfBlock=array.length/512;
 		for(int i=0;i<numOfBlock;i++){
 			byte[] data=Arrays.copyOfRange(array, i*512, (i+1)*512);
@@ -232,6 +255,21 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	@Override
 	public boolean shouldTerminate() {
 		return this.shouldTerminate;
+	}
+	
+	private static ConcurrentLinkedDeque<String> FilesInit(){
+		ConcurrentLinkedDeque<String> filestmp=new ConcurrentLinkedDeque<String>();
+		
+		File folder = new File(System.getProperty("user.dir")+"/Files/");
+		File[] listOfFiles=folder.listFiles();
+		 for (int i = 0; i <listOfFiles.length ; i++) {
+		      if (listOfFiles[i].isFile()) {
+		    	  filestmp.addLast(listOfFiles[i].getName());
+		        System.out.println(listOfFiles[i].getName());
+		    }
+		 }
+		
+		return filestmp;
 	}
 
 }

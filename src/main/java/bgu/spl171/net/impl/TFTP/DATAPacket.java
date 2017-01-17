@@ -25,7 +25,7 @@ public class DATAPacket extends Packet {
 	}
 
 	
-	public byte[] tobytes(){
+	public byte[] toBytes(){
 		byte[] temp=mergeBytes(super.toBytes(), TFTPEncoderDecoder.shortToBytes(packetSize));
 		byte[] temp1=mergeBytes(temp, TFTPEncoderDecoder.shortToBytes(blockNum));
 		return mergeBytes(temp1, data);
