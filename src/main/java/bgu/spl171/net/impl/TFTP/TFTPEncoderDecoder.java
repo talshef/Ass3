@@ -81,6 +81,14 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 		else{
 			if(blockNum==-1){
 				blockNum=getShort(nextByte);
+				if(byteLeft==0&&blockNum!=-1){
+					byte[] data=new byte[0];
+					result=new DATAPacket(oppcode, (short)(this.len), blockNum,data );
+					this.len=0;
+					this.oppcode=-1;
+					this.blockNum=-1;
+					this.byteLeft=-1;
+				}
 			}
 			else{
 				if(byteLeft==1) {
