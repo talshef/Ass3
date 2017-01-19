@@ -108,7 +108,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 					ByteToPacket(byteArray);
 				}
 			 } catch (IOException e) {
-			
+				 this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
 				e.printStackTrace();
 			}
 
