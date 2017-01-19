@@ -36,11 +36,9 @@ public abstract class BaseServer<T> implements Server<T> {
     	AtomicInteger Idcounter=new AtomicInteger(0);
         try (ServerSocket serverSock = new ServerSocket(port)) {
             this.sock = serverSock; //just to be able to close
-            System.out.println("here");
             while (!Thread.currentThread().isInterrupted()) {
             	
                 Socket clientSock = serverSock.accept();
-                System.out.println("here");
                 BidiMessagingProtocol<T> protocol=protocolFactory.get();
                 int id=Idcounter.getAndIncrement();
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(

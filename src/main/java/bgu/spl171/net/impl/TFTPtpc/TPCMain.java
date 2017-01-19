@@ -10,7 +10,6 @@ import bgu.spl171.net.impl.TFTP.*;
 
 public class TPCMain {
 	 public static void main(String[] args) {
-	       System.out.println("dd");
 
 	// you can use any server... 
 //	        Server.fixedThreadPool(
