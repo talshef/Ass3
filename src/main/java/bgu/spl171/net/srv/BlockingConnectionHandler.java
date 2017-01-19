@@ -86,6 +86,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 			}
 			
 		}
+		else System.out.println("null msg : ");
 		
 	}
 	

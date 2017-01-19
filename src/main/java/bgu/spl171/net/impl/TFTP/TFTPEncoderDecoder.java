@@ -75,12 +75,19 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 	
 	private Packet dataPakect(byte nextByte){
 		Packet result=null;
-		if (byteLeft==-1) byteLeft=getShort(nextByte);
+		if (byteLeft==-1) {
+			byteLeft=getShort(nextByte);
+		}
 		else{
-			if(blockNum==-1) blockNum=getShort(nextByte);
+			if(blockNum==-1){
+				blockNum=getShort(nextByte);
+			}
 			else{
-				if(byteLeft==0) {
-					result=new DATAPacket(oppcode, (short)(this.len-1), blockNum,getData() );
+				if(byteLeft==1) {
+					
+					pushByte(nextByte);
+					
+					result=new DATAPacket(oppcode, (short)(this.len), blockNum,getData() );
 					this.len=0;
 					this.oppcode=-1;
 					this.blockNum=-1;

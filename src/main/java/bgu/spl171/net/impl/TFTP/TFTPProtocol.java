@@ -30,7 +30,6 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	private int id;
 	private LinkedList<Packet> sendQueue=new LinkedList<Packet>();
 	private short blockCount;
-	private int ackState;
 	private boolean shouldTerminate=false;
 	private boolean loggedIn=false;
 	
@@ -104,7 +103,6 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 				if(!files.contains(message.GetString())) this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
 				else{
 					byte[] byteArray= Files.readAllBytes(f.toPath());
-					this.ackState=1; //ACK of sending file
 					ByteToPacket(byteArray);
 				}
 			 } catch (IOException e) {
@@ -123,7 +121,6 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 			File f=new File(s);
 			if(f.exists()) this.connections.send(this.id, new ERRORPacket((short)5, (short)5, "File already exists"));
 			else{
-				System.out.println(f.getAbsolutePath());
 				f.createNewFile();
 				this.file=new FileOutputStream(f,true);
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
@@ -135,8 +132,10 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	
 	private void DataProcess(DATAPacket message){
+		System.out.println("data");
 		try {
-			this.file.write(message.GetData());
+			
+			this.file.write(message.GetData());		
 			this.file.flush();
 			this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
 			if(message.GetPacketSize()<512){
@@ -152,19 +151,16 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void ACKProcess(ACKPacket message){
-		System.out.println("ACK");
-		switch(this.ackState){
-			case 1: if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "The ACK block not much to Data block"));
-					else{
-						if(!this.sendQueue.isEmpty()){
-							this.connections.send(this.id, this.sendQueue.removeFirst());
-							this.blockCount++;
-						}
-						else this.blockCount=0;
-					}
-			
+		System.out.println("ACK "+message.GetBlockNum());
+		if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)0, "Mismatch block num"));
+		else{
+			if(!this.sendQueue.isEmpty()){
+				this.connections.send(this.id, this.sendQueue.removeFirst());
+				this.blockCount++;
+			}
+			else this.blockCount=0;
+		}		
 		
-		}
 	}
 	
 	private void ErrorProcess(ERRORPacket message){
@@ -231,15 +227,17 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void ByteToPacket(byte[] array){
-		System.out.println(array.length);
+		System.out.println("size "+array.length);
 		int numOfBlock=array.length/512;
 		for(int i=0;i<numOfBlock;i++){
 			byte[] data=Arrays.copyOfRange(array, i*512, (i+1)*512);
 			this.sendQueue.addLast(new DATAPacket((short)3, (short)512, (short)(i+1), data));
 		}
 		byte[] data=Arrays.copyOfRange(array, numOfBlock*512, array.length);
+		System.out.println("send");
 		this.sendQueue.addLast(new DATAPacket((short)3, (short)data.length, (short)(numOfBlock+1), data));
 		this.blockCount=1;
+		System.out.println("send "+this.sendQueue.size());
 		this.connections.send(this.id, this.sendQueue.removeFirst());
 		
 		
