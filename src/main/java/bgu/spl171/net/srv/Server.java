@@ -30,7 +30,8 @@ public interface Server<T> extends Closeable {
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
             @Override
             protected void execute(Runnable  handler) {
-                handler.run();
+            	new Thread(handler).start();;
+            	
             }
         };
 

@@ -106,7 +106,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 					ByteToPacket(byteArray);
 				}
 			 } catch (IOException e) {
-				 this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
+				 this.connections.send(this.id, new ERRORPacket((short)5, (short)2, ""));
 				e.printStackTrace();
 			}
 
@@ -126,6 +126,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
 			}
 		 } catch (IOException e) {
+			 this.connections.send(this.id, new ERRORPacket((short)5, (short)2, ""));
 			e.printStackTrace();
 		}
 	}
@@ -213,6 +214,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 			else{
 				this.connections.send(this.id,new ERRORPacket((short)5, (short)2, "File can't be deleted"));
 			}
+			
 			
 		}
 	}
