@@ -54,7 +54,7 @@ public abstract class BaseServer<T> implements Server<T> {
                 	handler.run();
                 } );
             	 
-                System.out.println("here2");
+              
             }
         } catch (IOException ex) {
         	ex.printStackTrace();

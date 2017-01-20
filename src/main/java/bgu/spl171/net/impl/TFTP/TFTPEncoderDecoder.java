@@ -72,7 +72,7 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 	}
 	
 	
-	
+	//decode DATAPacket
 	private Packet dataPakect(byte nextByte){
 		Packet result=null;
 		if (byteLeft==-1) {
@@ -113,6 +113,7 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 		
 	}
 	
+	//decode ERRORPacket
 	private Packet errorPacket(byte nextByte){
 		Packet result=null;
 		if(blockNum==-1) blockNum=getShort(nextByte);
@@ -133,7 +134,7 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 	
 	
 	
-	
+	//decode Packet with string(RQPACKET)
 	private Packet stringPakect(byte nextByte){
 		if(nextByte=='\0'){
 			Packet result=new RQPacket(this.oppcode, new String(this.bytes, 0, this.len, StandardCharsets.UTF_8));
@@ -146,6 +147,8 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 			return null;
 		}
 	}
+	
+	//decode ACKPacket
 	private Packet ackPakect(byte nextByte){
 		Packet result=null;
 		blockNum=getShort(nextByte);

@@ -74,7 +74,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 		
 		if(msg!=null){
 			try {
-				System.out.println("opp send : "+((Packet)msg).GetOppcode());
 				out.write(encdec.encode(msg));
 				out.flush();
 			} catch (IOException e) {
