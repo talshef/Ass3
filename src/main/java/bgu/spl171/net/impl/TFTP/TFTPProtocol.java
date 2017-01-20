@@ -132,7 +132,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private void DataProcess(DATAPacket message){
 		try {
-			
+			System.out.println("id :"+this.id+" ack "+message.GetBlockNum());
 			this.file.write(message.GetData());		
 			this.file.flush();
 			this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
