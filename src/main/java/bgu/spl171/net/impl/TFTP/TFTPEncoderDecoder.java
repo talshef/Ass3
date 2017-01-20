@@ -95,7 +95,7 @@ public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 					
 					pushByte(nextByte);
 					
-					result=new DATAPacket(oppcode, (short)(this.len), blockNum,getData() );
+					result=new DATAPacket(oppcode, (short)(this.len), blockNum,getData());
 					this.len=0;
 					this.oppcode=-1;
 					this.blockNum=-1;

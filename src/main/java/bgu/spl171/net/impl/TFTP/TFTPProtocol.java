@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -172,8 +171,8 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		File[] listOfFiles = folder.listFiles();
 
 		for (int i = 0; i < listOfFiles.length; i++) {
-		   if (!tempfiles.contains(listOfFiles[i])) {
-		     counter+=listOfFiles[i].length()+1;
+		   if (!tempfiles.contains(listOfFiles[i].getName())) {
+		     counter+=listOfFiles[i].getName().length()+1;
 		    }
 		}
 		
@@ -181,7 +180,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		ByteBuffer buffer=ByteBuffer.wrap(res);
 		byte[] zeroArray={0x00};
 		 for (int i = 0; i < listOfFiles.length; i++) {
-		      if (!tempfiles.contains(listOfFiles[i])) {
+		      if (!tempfiles.contains(listOfFiles[i].getName())) {
 		    	  buffer.put(listOfFiles[i].getName().getBytes());
 		    	  buffer.put(zeroArray);
 		      }
