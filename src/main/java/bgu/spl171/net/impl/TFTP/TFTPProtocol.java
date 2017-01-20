@@ -105,8 +105,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 					ByteToPacket(byteArray);
 				}
 			 } catch (IOException e) {
-				 this.connections.send(this.id, new ERRORPacket((short)5, (short)2, ""));
-				e.printStackTrace();
+				 this.connections.send(this.id, new ERRORPacket((short)5, (short)2, "File cannot be read"));
 			}
 
 		
@@ -117,7 +116,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		this.filename=message.GetString();
 		try {
 			File f=new File(s);
-			if(f.exists()) this.connections.send(this.id, new ERRORPacket((short)5, (short)5, "File already exists"));
+			if(f.exists()||tempfiles.contains(message.GetString())) this.connections.send(this.id, new ERRORPacket((short)5, (short)5, "File already exists"));
 			else{
 				tempfiles.addLast(message.GetString());
 				f.createNewFile();
@@ -126,7 +125,6 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 			}
 		 } catch (IOException e) {
 			 this.connections.send(this.id, new ERRORPacket((short)5, (short)2, ""));
-			e.printStackTrace();
 		}
 	}
 	
@@ -144,7 +142,11 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 				this.filename=null;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			new File(this.filename).delete();
+			tempfiles.remove(this.filename);
+			this.connections.send(this.id, new ERRORPacket((short)5, (short)2, "File cannot be written"));
+			this.file=null;
+			this.filename=null;
 		}
 	}
 	
