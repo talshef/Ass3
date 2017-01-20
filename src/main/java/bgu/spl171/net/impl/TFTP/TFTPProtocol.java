@@ -21,7 +21,7 @@ import bgu.spl171.net.impl.TFTP.Packet;
 public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private static Map<Integer,String> users=new HashMap<Integer, String>();
-	private static ConcurrentLinkedDeque<String> files=FilesInit();
+	private static ConcurrentLinkedDeque<String> tempfiles=new ConcurrentLinkedDeque<String>();
 	
 	private FileOutputStream file=null;
 	private String filename=null;
@@ -99,7 +99,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		String s=this.filesFolder+message.GetString();
 			 try {
 				File f=new File(s);
-				if(!files.contains(message.GetString())) this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
+				if(!f.exists() || tempfiles.contains(message.GetString())) this.connections.send(this.id, new ERRORPacket((short)5, (short)1, "File not found"));
 				else{
 					byte[] byteArray= Files.readAllBytes(f.toPath());
 					ByteToPacket(byteArray);
@@ -119,6 +119,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 			File f=new File(s);
 			if(f.exists()) this.connections.send(this.id, new ERRORPacket((short)5, (short)5, "File already exists"));
 			else{
+				tempfiles.addLast(message.GetString());
 				f.createNewFile();
 				this.file=new FileOutputStream(f,true);
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
@@ -137,7 +138,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 			this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
 			if(message.GetPacketSize()<512){
 				this.file.close();
-				files.addLast(this.filename);
+				tempfiles.remove(this.filename);
 				Bcast((byte)1, this.filename);
 				this.file=null;
 				this.filename=null;
@@ -164,20 +165,26 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void DirRequest(Packet message){
-		String s="";
 		int counter=0;
-		for(String filename: this.files){
-			counter+=filename.length()+1;
-			
+		File folder = new File(filesFolder);
+		File[] listOfFiles = folder.listFiles();
+
+		for (int i = 0; i < listOfFiles.length; i++) {
+		   if (!tempfiles.contains(listOfFiles[i])) {
+		     counter+=listOfFiles[i].length()+1;
+		    }
 		}
+		
 		byte[] res=new byte[counter];
 		ByteBuffer buffer=ByteBuffer.wrap(res);
 		byte[] zeroArray={0x00};
-		for(String filename: this.files){
-			buffer.put(filename.getBytes());
-			buffer.put(zeroArray);
-
-		}
+		 for (int i = 0; i < listOfFiles.length; i++) {
+		      if (!tempfiles.contains(listOfFiles[i])) {
+		    	  buffer.put(listOfFiles[i].getName().getBytes());
+		    	  buffer.put(zeroArray);
+		      }
+		    }
+		
 		ByteToPacket(res);
 	}
 	
@@ -195,11 +202,11 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void DelRequest(RQPacket message){
-		if(!files.contains(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "File not found"));
+		
+		File f= new File(this.filesFolder+message.GetString());
+		if(!f.exists() || tempfiles.contains(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)1, "File not found"));
 		else{
-			File f= new File(this.filesFolder+message.GetString());
 			if(f.delete()){
-				files.remove(message.GetString());
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
 				Bcast((byte)0, message.GetString());
 			}
@@ -245,18 +252,18 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		return this.shouldTerminate;
 	}
 	
-	private static ConcurrentLinkedDeque<String> FilesInit(){
-		ConcurrentLinkedDeque<String> filestmp=new ConcurrentLinkedDeque<String>();
-		
-		File folder = new File(System.getProperty("user.dir")+"/Files/");
-		File[] listOfFiles=folder.listFiles();
-		 for (int i = 0; i <listOfFiles.length ; i++) {
-		      if (listOfFiles[i].isFile()) {
-		    	  filestmp.addLast(listOfFiles[i].getName());
-		    }
-		 }
-		
-		return filestmp;
-	}
+//	private static ConcurrentLinkedDeque<String> FilesInit(){
+//		ConcurrentLinkedDeque<String> filestmp=new ConcurrentLinkedDeque<String>();
+//		
+//		File folder = new File(System.getProperty("user.dir")+"/Files/");
+//		File[] listOfFiles=folder.listFiles();
+//		 for (int i = 0; i <listOfFiles.length ; i++) {
+//		      if (listOfFiles[i].isFile()) {
+//		    	  filestmp.addLast(listOfFiles[i].getName());
+//		    }
+//		 }
+//		
+//		return filestmp;
+//	}
 
 }
