@@ -129,6 +129,9 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	
 	private void DataProcess(DATAPacket message){
+		System.out.println("packet size: "+message.GetPacketSize());
+		System.out.println("packet num: "+message.GetBlockNum());
+		System.out.println("last: "+message.GetData()[message.GetPacketSize()-1]);
 		try {
 			this.file.write(message.GetData());		
 			this.file.flush();
