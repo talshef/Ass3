@@ -129,9 +129,6 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	
 	private void DataProcess(DATAPacket message){
-		System.out.println("packet size: "+message.GetPacketSize());
-		System.out.println("packet num: "+message.GetBlockNum());
-		System.out.println("last: "+message.GetData()[message.GetPacketSize()-1]);
 		try {
 			this.file.write(message.GetData());		
 			this.file.flush();
@@ -153,6 +150,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void ACKProcess(ACKPacket message){
+		System.out.println(message.GetBlockNum());
 		if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)0, "Mismatch block num"));
 		else{
 			if(!this.sendQueue.isEmpty()){
