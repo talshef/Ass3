@@ -194,7 +194,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private void LogRequest(RQPacket message){
 		
-		if(users.containsValue(this.id) || users.containsValue(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)7, "User already logged in"));
+		if(users.containsKey(this.id) || users.containsValue(message.GetString())) this.connections.send(this.id,new ERRORPacket((short)5, (short)7, "User already logged in"));
 		
 		else{
 			
