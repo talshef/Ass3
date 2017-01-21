@@ -170,10 +170,16 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	}
 	
 	private void ACKProcess(ACKPacket message){
+		System.out.println("recive ack: "+message.GetBlockNum());
 		if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)0, "Mismatch block num"));
 		else{
 			if(!this.sendQueue.isEmpty()){
-				this.connections.send(this.id, this.sendQueue.removeFirst());
+				if(!this.connections.send(this.id, this.sendQueue.removeFirst())){
+					System.out.println("not sent: "+(message.GetBlockNum()+1));
+				}else{
+					System.out.println("sent: "+(message.GetBlockNum()+1));
+				}
+				
 				this.blockCount++;
 			}
 			else this.blockCount=0;

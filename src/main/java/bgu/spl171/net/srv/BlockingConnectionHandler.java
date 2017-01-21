@@ -52,9 +52,11 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
              
                 }
             }
+            System.out.println("disconnet");
             close();
             
         } catch (IOException ex) {
+        	System.out.println("disconnet");
             ex.printStackTrace();
         }
 

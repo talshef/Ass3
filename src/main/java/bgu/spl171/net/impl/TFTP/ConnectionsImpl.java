@@ -1,14 +1,16 @@
 package bgu.spl171.net.impl.TFTP;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import bgu.spl171.net.api.bidi.Connections;
 import bgu.spl171.net.srv.ConnectionHandler;
 
 public class ConnectionsImpl<T> implements Connections<T> {
 	
-	private Map<Integer,ConnectionHandler<T>> connections = new WeakHashMap<Integer, ConnectionHandler<T>>();
+	private Map<Integer,ConnectionHandler<T>> connections = new ConcurrentHashMap<Integer, ConnectionHandler<T>>();
 	
 	
 	public boolean AddConnection(int id,ConnectionHandler<T> con){
