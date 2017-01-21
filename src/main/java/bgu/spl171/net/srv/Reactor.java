@@ -1,7 +1,6 @@
 package bgu.spl171.net.srv;
 
 import bgu.spl171.net.api.MessageEncoderDecoder;
-import bgu.spl171.net.api.MessagingProtocol;
 import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl171.net.impl.TFTP.ConnectionsImpl;
 
@@ -103,7 +102,7 @@ public class Reactor<T> implements Server<T> {
         clientChan.configureBlocking(false);
         BidiMessagingProtocol<T> protocol= protocolFactory.get();
         int id=idCounter.incrementAndGet();
-        final NonBlockingConnectionHandler handler = new NonBlockingConnectionHandler(
+        final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<T>(
                 readerFactory.get(),
                 protocol,
                 clientChan,
@@ -114,7 +113,7 @@ public class Reactor<T> implements Server<T> {
     }
 
     private void handleReadWrite(SelectionKey key) {
-        NonBlockingConnectionHandler handler = (NonBlockingConnectionHandler) key.attachment();
+        NonBlockingConnectionHandler<T> handler = (NonBlockingConnectionHandler) key.attachment();
         if (key.isReadable()) {
             Runnable task = handler.continueRead();
             if (task != null) {

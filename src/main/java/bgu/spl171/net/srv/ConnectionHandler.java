@@ -6,7 +6,7 @@
 package bgu.spl171.net.srv;
 
 import java.io.Closeable;
-import java.io.IOException;
+
 
 /**
  *

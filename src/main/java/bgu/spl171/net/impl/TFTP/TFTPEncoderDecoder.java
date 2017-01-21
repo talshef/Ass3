@@ -1,6 +1,5 @@
 package bgu.spl171.net.impl.TFTP;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -8,13 +7,12 @@ import bgu.spl171.net.api.MessageEncoderDecoder;
 
 public class TFTPEncoderDecoder<T> implements MessageEncoderDecoder<Packet> {
 	
-	private int state=0;
+
 
 	private byte[] bytes = new byte[1 << 10]; //start with 1k
 	private byte[] shortBytes=new byte[2];
 	private int len = 0;
 	private short blockNum=-1;
-	private short packetSize=-1;
 	private short oppcode=-1;
 	private int shortIndex=0;
 	private short byteLeft=-1;

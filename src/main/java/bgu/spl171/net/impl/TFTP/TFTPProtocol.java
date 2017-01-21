@@ -129,28 +129,30 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	
 	private void DataProcess(DATAPacket message){
-		try {
-			this.file.write(message.GetData());		
-			this.file.flush();
-			this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
-			if(message.GetPacketSize()<512){
-				this.file.close();
+		if(this.file==null) this.connections.send(this.id, new ERRORPacket((short)5, (short)0, "Unknown data packet have arrived"));
+		else{ 
+			try {
+				this.file.write(message.GetData());		
+				this.file.flush();
+				this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
+				if(message.GetPacketSize()<512){
+					this.file.close();
+					tempfiles.remove(this.filename);
+					Bcast((byte)1, this.filename);
+					this.file=null;
+					this.filename=null;
+				}
+			} catch (IOException e) {
+				new File(this.filename).delete();
 				tempfiles.remove(this.filename);
-				Bcast((byte)1, this.filename);
+				this.connections.send(this.id, new ERRORPacket((short)5, (short)2, "File cannot be written"));
 				this.file=null;
 				this.filename=null;
 			}
-		} catch (IOException e) {
-			new File(this.filename).delete();
-			tempfiles.remove(this.filename);
-			this.connections.send(this.id, new ERRORPacket((short)5, (short)2, "File cannot be written"));
-			this.file=null;
-			this.filename=null;
 		}
 	}
 	
 	private void ACKProcess(ACKPacket message){
-		System.out.println(message.GetBlockNum());
 		if(this.blockCount!=message.GetBlockNum()) this.connections.send(this.id,new ERRORPacket((short)5, (short)0, "Mismatch block num"));
 		else{
 			if(!this.sendQueue.isEmpty()){
@@ -254,18 +256,5 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 		return this.shouldTerminate;
 	}
 	
-//	private static ConcurrentLinkedDeque<String> FilesInit(){
-//		ConcurrentLinkedDeque<String> filestmp=new ConcurrentLinkedDeque<String>();
-//		
-//		File folder = new File(System.getProperty("user.dir")+"/Files/");
-//		File[] listOfFiles=folder.listFiles();
-//		 for (int i = 0; i <listOfFiles.length ; i++) {
-//		      if (listOfFiles[i].isFile()) {
-//		    	  filestmp.addLast(listOfFiles[i].getName());
-//		    }
-//		 }
-//		
-//		return filestmp;
-//	}
 
 }

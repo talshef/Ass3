@@ -5,8 +5,6 @@ import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
 
 
 import bgu.spl171.net.api.bidi.Connections;
-import bgu.spl171.net.impl.TFTP.Packet;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -81,9 +79,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 				e.printStackTrace();
 			}
 			
-		}
-		else System.out.println("null msg : ");
-		
+		}		
 	}
 	
 	
