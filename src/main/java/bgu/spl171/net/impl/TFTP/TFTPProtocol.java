@@ -31,6 +31,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	private short blockCount;
 	private boolean shouldTerminate=false;
 	private boolean loggedIn=false;
+	private short dataNum;
 	
 	@Override
 	public void start(int connectionId, Connections<Packet> connections) {
@@ -120,6 +121,7 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 				tempfiles.addLast(message.GetString());
 				f.createNewFile();
 				this.file=new FileOutputStream(f,true);
+				this.dataNum=1;
 				this.connections.send(this.id, new ACKPacket((short)4, (short)0));
 			}
 		 } catch (IOException e) {
@@ -130,11 +132,26 @@ public class TFTPProtocol<T> implements BidiMessagingProtocol<Packet> {
 	
 	private void DataProcess(DATAPacket message){
 		if(this.file==null) this.connections.send(this.id, new ERRORPacket((short)5, (short)0, "Unknown data packet have arrived"));
+		if(this.dataNum!=message.GetBlockNum()){
+			try{
+				this.file.close();
+				new File(this.filesFolder+this.filename).delete();
+				this.connections.send(this.id, new ERRORPacket((short)5, (short)0, "Disorder data packet"));
+				tempfiles.remove(this.filename);
+				this.file=null;
+				this.filename=null;
+			}catch (IOException e) {
+				
+			}
+			
+		}
 		else{ 
 			try {
+				dataNum++;
+				this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
 				this.file.write(message.GetData());		
 				this.file.flush();
-				this.connections.send(this.id, new ACKPacket((short)4, (short)message.GetBlockNum()));
+				
 				if(message.GetPacketSize()<512){
 					this.file.close();
 					tempfiles.remove(this.filename);
